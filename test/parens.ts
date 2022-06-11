@@ -111,6 +111,8 @@ describe("parens", function () {
     check("new (a.b())");
     check("new (a.b())(c)");
     check("new a.b(c)");
+    check("new (a.b().c)()");
+    check("new (a.b()[c])()");
     check("+new Date");
     check("(new Date).getTime()");
     check("new a");
