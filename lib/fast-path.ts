@@ -319,17 +319,13 @@ FPp.needsParens = function () {
     case "UnaryExpression":
     case "SpreadElement":
     case "SpreadProperty":
-      return (
-        parent.type === "MemberExpression" &&
-        name === "object" &&
-        parent.object === node
-      );
+      return parent.type === "MemberExpression" && name === "object";
 
     case "BinaryExpression":
     case "LogicalExpression":
       switch (parent.type) {
         case "CallExpression":
-          return name === "callee" && parent.callee === node;
+          return name === "callee";
 
         case "UnaryExpression":
         case "SpreadElement":
@@ -337,7 +333,7 @@ FPp.needsParens = function () {
           return true;
 
         case "MemberExpression":
-          return name === "object" && parent.object === node;
+          return name === "object";
 
         case "BinaryExpression":
         case "LogicalExpression": {
@@ -351,7 +347,6 @@ FPp.needsParens = function () {
           }
 
           if (pp === np && name === "right") {
-            assert.strictEqual(parent.right, node);
             return true;
           }
 
@@ -388,17 +383,12 @@ FPp.needsParens = function () {
       return (
         parent.type === "MemberExpression" &&
         isNumber.check(node.value) &&
-        name === "object" &&
-        parent.object === node
+        name === "object"
       );
 
     // Babel 6 Literal split
     case "NumericLiteral":
-      return (
-        parent.type === "MemberExpression" &&
-        name === "object" &&
-        parent.object === node
-      );
+      return parent.type === "MemberExpression" && name === "object";
 
     case "YieldExpression":
     case "AwaitExpression":
@@ -414,40 +404,31 @@ FPp.needsParens = function () {
 
         case "CallExpression":
         case "NewExpression":
-          return name === "callee" && parent.callee === node;
+          return name === "callee";
 
         case "ConditionalExpression":
-          return name === "test" && parent.test === node;
+          return name === "test";
 
         case "MemberExpression":
-          return name === "object" && parent.object === node;
+          return name === "object";
 
         default:
           return false;
       }
 
     case "ArrowFunctionExpression":
-      if (
-        n.CallExpression.check(parent) &&
-        name === "callee" &&
-        parent.callee === node
-      ) {
+      if (n.CallExpression.check(parent) && name === "callee") {
         return true;
       }
 
-      if (
-        n.MemberExpression.check(parent) &&
-        name === "object" &&
-        parent.object === node
-      ) {
+      if (n.MemberExpression.check(parent) && name === "object") {
         return true;
       }
 
       if (
         n.TSAsExpression &&
         n.TSAsExpression.check(parent) &&
-        name === "expression" &&
-        parent.expression === node
+        name === "expression"
       ) {
         return true;
       }
@@ -455,11 +436,7 @@ FPp.needsParens = function () {
       return isBinary(parent);
 
     case "ObjectExpression":
-      if (
-        parent.type === "ArrowFunctionExpression" &&
-        name === "body" &&
-        parent.body === node
-      ) {
+      if (parent.type === "ArrowFunctionExpression" && name === "body") {
         return true;
       }
 
@@ -469,7 +446,6 @@ FPp.needsParens = function () {
       if (
         parent.type === "ArrowFunctionExpression" &&
         name === "body" &&
-        parent.body === node &&
         node.expression.type === "ObjectExpression"
       ) {
         return true;
@@ -495,7 +471,7 @@ FPp.needsParens = function () {
       switch (parent.type) {
         case "IndexedAccessType":
           // `(O?.['x'])['y']` is distinct from `O?.['x']['y']`.
-          return name === "objectType" && parent.objectType === node;
+          return name === "objectType";
         default:
           return false;
       }
@@ -508,7 +484,7 @@ FPp.needsParens = function () {
       switch (parent.type) {
         case "OptionalIndexedAccessType":
         case "IndexedAccessType":
-          return name === "objectType" && parent.objectType === node;
+          return name === "objectType";
         case "ArrayTypeAnnotation":
           return true;
         default:
@@ -519,7 +495,7 @@ FPp.needsParens = function () {
       switch (parent.type) {
         case "OptionalIndexedAccessType":
         case "IndexedAccessType":
-          return name === "objectType" && parent.objectType === node;
+          return name === "objectType";
         case "ArrayTypeAnnotation":
         case "NullableTypeAnnotation":
           return true;
@@ -531,7 +507,7 @@ FPp.needsParens = function () {
       switch (parent.type) {
         case "OptionalIndexedAccessType":
         case "IndexedAccessType":
-          return name === "objectType" && parent.objectType === node;
+          return name === "objectType";
         case "ArrayTypeAnnotation":
         case "NullableTypeAnnotation":
         case "IntersectionTypeAnnotation":
@@ -544,7 +520,7 @@ FPp.needsParens = function () {
       switch (parent.type) {
         case "OptionalIndexedAccessType":
         case "IndexedAccessType":
-          return name === "objectType" && parent.objectType === node;
+          return name === "objectType";
 
         case "ArrayTypeAnnotation":
         // We need parens.
@@ -569,11 +545,7 @@ FPp.needsParens = function () {
       }
   }
 
-  if (
-    parent.type === "NewExpression" &&
-    name === "callee" &&
-    parent.callee === node
-  ) {
+  if (parent.type === "NewExpression" && name === "callee") {
     return containsCallExpression(node);
   }
 
