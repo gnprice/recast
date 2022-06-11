@@ -148,7 +148,7 @@ describe("Flow type syntax", function () {
         eol +
         "};",
     );
-    check("var methodAnonymousParameter: { m(number): void };")
+    check("var methodAnonymousParameter: { m(number): void };");
 
     check(`declare var v: { get getter(): number };`);
     check(`declare var v: { set setter(number): void };`);
@@ -159,7 +159,7 @@ describe("Flow type syntax", function () {
 
     // Declare
     check("declare var A: string;");
-    check("declare var methodAnonymousParameter: { m(number): void };")
+    check("declare var methodAnonymousParameter: { m(number): void };");
 
     check("declare function foo(c: C): void;");
     check("declare function foo(c: C, b: B): void;");
@@ -168,7 +168,7 @@ describe("Flow type syntax", function () {
     check("declare function f(): () => void;");
     check("declare function f(): (cb: () => void) => () => void;");
     check("declare function f(m: (cb: () => void) => () => void): void;");
-    check("declare function anonymousParameter(number): void;")
+    check("declare function anonymousParameter(number): void;");
     check("declare function f(): (() => void) => () => void;");
     check("declare function f((() => void) => () => void): void;");
     check("declare function f(): ('a' & mixed) => void;");
