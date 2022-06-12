@@ -776,7 +776,7 @@ function runTestsForParser(parserId: any) {
   );
 
   pit(
-    "(failing) should not reprint just because the return expression started with comment",
+    "should not reprint just because the return expression started with comment",
     function () {
       const code = [
         "function f() {",
@@ -784,6 +784,32 @@ function runTestsForParser(parserId: any) {
         "    //Foo",
         "    1     +     2",
         "  );",
+        "}",
+      ].join(eol);
+      const ast = recast.parse(code, { parser });
+      if (
+        parserName === "babel" ||
+        parserName === "flow" ||
+        parserName === "typescript"
+      ) {
+        // This test currently fails on these parsers (because the
+        // BinaryExpression has `.extra.parenthesized`, and our needsParens
+        // logic causes us to reprint it.)  Check that it's still failing.
+        assert.notStrictEqual(recast.print(ast).code, code); // wrong answer
+      } else {
+        // On other parsers, the test passes.
+        assert.strictEqual(recast.print(ast).code, code);
+      }
+    },
+  );
+
+  pit(
+    "should not reprint just because return expression started with comment, v2",
+    function () {
+      const code = [
+        "function f() {",
+        "  return /*",
+        "    foo */   1     +     2 ;",
         "}",
       ].join(eol);
       const ast = recast.parse(code, { parser });
