@@ -736,6 +736,22 @@ function runTestsForParser(parserId: any) {
   );
 
   pit(
+    "(failing) should not reprint just because the return expression started with comment",
+    function () {
+      const code = [
+        "function f() {",
+        "  return (",
+        "    //Foo",
+        "    1     +     2",
+        "  );",
+        "}",
+      ].join(eol);
+      const ast = recast.parse(code, { parser });
+      assert.notStrictEqual(recast.print(ast).code, code); // FAIL; should be equal
+    },
+  );
+
+  pit(
     "should not wrap in parens when the return expression has an interior comment",
     function () {
       const code = ["function f() {", "  return 1 + 2;", "}"].join(eol);
