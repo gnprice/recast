@@ -736,6 +736,42 @@ function runTestsForParser(parserId: any) {
   );
 
   pit(
+    "should not wrap return argument in parens on change that doesn't cause ASI, with comments",
+    function () {
+      // https://github.com/benjamn/recast/issues/552
+      const code = [
+        "function f() {",
+        "  return /** @type {string} */ (foo());",
+        "}",
+      ].join(eol);
+      const ast = recast.parse(code, { parser });
+      ast.program.body[0].body.body[0].argument.callee = b.identifier("bar");
+      assert.strictEqual(recast.print(ast).code, code.replace("foo", "bar"));
+    },
+  );
+
+  pit(
+    "should not wrap return argument in parens on change that doesn't cause ASI, with JSX",
+    function () {
+      // https://github.com/benjamn/recast/issues/552#issuecomment-894638273
+      const code = [
+        "function f() {",
+        "  return <Component",
+        '    lorem="ipsum"',
+        "  />",
+        "}",
+      ].join(eol);
+      const ast = recast.parse(code, { parser });
+      ast.program.body[0].body.body[0].argument.openingElement.attributes[0].value =
+        b.stringLiteral("dolor");
+      assert.strictEqual(
+        recast.print(ast).code,
+        code.replace("ipsum", "dolor"),
+      );
+    },
+  );
+
+  pit(
     "(failing) should not reprint just because the return expression started with comment",
     function () {
       const code = [
