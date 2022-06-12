@@ -691,9 +691,8 @@ function runTestsForParser(parserId: any) {
     assert.strictEqual(recast.print(ast).code, code);
   });
 
-  pit(
-    "should preserve correctness when a return expression has a comment",
-    function () {
+  describe("avoid ASI on return arguments", function () {
+    pit("wrap when argument gains leading comment", function () {
       const code = ["function f() {", "  return 3;", "}"].join(eol);
 
       const ast = recast.parse(code, { parser });
@@ -710,12 +709,9 @@ function runTestsForParser(parserId: any) {
           "}",
         ].join(eol),
       );
-    },
-  );
+    });
 
-  pit(
-    "should wrap in parens when the return expression has nested leftmost comment",
-    function () {
+    pit("wrap when argument gains nested leading comment", function () {
       const code = ["function f() {", "  return 1 + 2;", "}"].join(eol);
 
       const ast = recast.parse(code, { parser });
@@ -732,12 +728,9 @@ function runTestsForParser(parserId: any) {
           "}",
         ].join(eol),
       );
-    },
-  );
+    });
 
-  pit(
-    "should wrap in parens when return gains argument with leading comment",
-    function () {
+    pit("wrap when gains argument with leading comment", function () {
       const code = ["function f() {", "  return;", "}"].join(eol);
 
       const ast = recast.parse(code, { parser });
@@ -756,27 +749,24 @@ function runTestsForParser(parserId: any) {
           "}",
         ].join(eol),
       );
-    },
-  );
+    });
 
-  pit(
-    "should not wrap return argument in parens on change that doesn't cause ASI, with comments",
-    function () {
-      // https://github.com/benjamn/recast/issues/552
-      const code = [
-        "function f() {",
-        "  return /** @type {string} */ (foo());",
-        "}",
-      ].join(eol);
-      const ast = recast.parse(code, { parser });
-      ast.program.body[0].body.body[0].argument.callee = b.identifier("bar");
-      assert.strictEqual(recast.print(ast).code, code.replace("foo", "bar"));
-    },
-  );
+    pit(
+      "don't wrap on internal change, with existing leading comment",
+      function () {
+        // https://github.com/benjamn/recast/issues/552
+        const code = [
+          "function f() {",
+          "  return /** @type {string} */ (foo());",
+          "}",
+        ].join(eol);
+        const ast = recast.parse(code, { parser });
+        ast.program.body[0].body.body[0].argument.callee = b.identifier("bar");
+        assert.strictEqual(recast.print(ast).code, code.replace("foo", "bar"));
+      },
+    );
 
-  pit(
-    "should not wrap return argument in parens on change that doesn't cause ASI, with JSX",
-    function () {
+    pit("don't wrap on internal change, when JSX", function () {
       if (parserName === "acorn" || parserName === "typescript") {
         // SKIP on parsers that don't support this syntax.
         return;
@@ -796,12 +786,9 @@ function runTestsForParser(parserId: any) {
         recast.print(ast).code,
         code.replace("ipsum", "dolor"),
       );
-    },
-  );
+    });
 
-  pit(
-    "should not reprint just because the return expression started with comment",
-    function () {
+    pit("don't reprint on no change, with leading comment", function () {
       const code = [
         "function f() {",
         "  return (",
@@ -824,26 +811,23 @@ function runTestsForParser(parserId: any) {
         // On other parsers, the test passes.
         assert.strictEqual(recast.print(ast).code, code);
       }
-    },
-  );
+    });
 
-  pit(
-    "should not reprint just because return expression started with comment, v2",
-    function () {
-      const code = [
-        "function f() {",
-        "  return /*",
-        "    foo */   1     +     2 ;",
-        "}",
-      ].join(eol);
-      const ast = recast.parse(code, { parser });
-      assert.strictEqual(recast.print(ast).code, code);
-    },
-  );
+    pit(
+      "don't reprint on no change, with leading comment and no parens",
+      function () {
+        const code = [
+          "function f() {",
+          "  return /*",
+          "    foo */   1     +     2 ;",
+          "}",
+        ].join(eol);
+        const ast = recast.parse(code, { parser });
+        assert.strictEqual(recast.print(ast).code, code);
+      },
+    );
 
-  pit(
-    "should not wrap in parens when the return expression has an interior comment",
-    function () {
+    pit("don't wrap when argument gains an interior comment", function () {
       const code = ["function f() {", "  return 1 + 2;", "}"].join(eol);
 
       const ast = recast.parse(code, { parser });
@@ -855,8 +839,8 @@ function runTestsForParser(parserId: any) {
         recast.print(ast).code,
         ["function f() {", "  return 1 + //Foo", "  2;", "}"].join(eol),
       );
-    },
-  );
+    });
+  });
 
   pit("should correctly handle a lonesome comment (alt 1)", function () {
     const code = ["", "// boo", ""].join(eol);
