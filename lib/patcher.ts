@@ -515,7 +515,7 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   // comments inserted deep within the tree, so reprint them if anything
   // changed within them.
   if (
-    ReturnStatement.check(newPath.getNode()) &&
+    ReturnStatement.check(newNode) &&
     reprints.length > originalReprintCount
   ) {
     // return false;
