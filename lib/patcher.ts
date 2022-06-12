@@ -166,6 +166,7 @@ Pp.deleteComments = function (node) {
 
 export function getReprinter(path: any) {
   assert.ok(path instanceof FastPath);
+  // console.log("getReprinter", path.formatPropertyPath(), path.getValue()?.type);
 
   // Make sure that this path refers specifically to a Node, rather than
   // some non-Node subproperty of a Node.
@@ -287,6 +288,7 @@ function needsTrailingSpace(oldLines: any, oldLoc: any, newLines: any) {
 }
 
 function findReprints(newPath: any, reprints: any) {
+  // console.log("findReprints", newPath.formatPropertyPath());
   const newNode = newPath.getValue();
   Printable.assert(newNode);
 
@@ -379,6 +381,7 @@ function findObjectReprints(newPath: any, oldPath: any, reprints: any) {
 
   if (Printable.check(newNode)) {
     if (!Printable.check(oldNode)) {
+      assert.fail();
       return false;
     }
 
@@ -454,6 +457,7 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
 
   isObject.assert(newNode);
   isObject.assert(oldNode);
+  assert.strictEqual(oldNode.type, newNode.type);
 
   if (newNode.original === null) {
     // If newNode.original node was set to null, reprint the node.
@@ -475,7 +479,7 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
       if (oldLeading !== newLeading) {
         // A comment was inserted at the start of the argument.
         // Reprint to avoid running into ASI issues (like #362.)
-        return false;
+        // return false;
       }
     }
   }
@@ -518,7 +522,26 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     ReturnStatement.check(newNode) &&
     reprints.length > originalReprintCount
   ) {
-    // return false;
+    if (!oldNode.argument) return false;
+    const tokens = oldNode.loc.tokens;
+    const asiSensitiveToken = oldNode.loc.start.token;
+    let i = asiSensitiveToken + 1;
+    while (i < tokens.length && types.namedTypes.Comment.check(tokens[i])) i++;
+    const restrictedToken = i;
+
+    // console.log({
+    //   asiSensitivePos,
+    //   end: argLoc.end,
+    //   // tokens: argLoc.tokens.slice(argLoc.start.token, argLoc.end.token),
+    //   tokens: argLoc.tokens,
+    // });
+    for (let i = originalReprintCount; i < reprints.length; i++) {
+      const affectedLoc = reprints[i].oldPath.getValue().loc;
+      // console.log({ affectedLoc });
+      if (affectedLoc.start.token <= restrictedToken) {
+        return false;
+      }
+    }
   }
 
   return true;
