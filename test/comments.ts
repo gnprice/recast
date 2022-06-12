@@ -766,6 +766,34 @@ function runTestsForParser(parserId: any) {
       },
     );
 
+    pit(
+      "don't reprint on internal change at start, with no comment",
+      function () {
+        const code = [
+          "function f() {",
+          "  return   123     +     2 ;",
+          "}",
+        ].join(eol);
+        const ast = recast.parse(code, { parser });
+        ast.program.body[0].body.body[0].argument.left = b.numericLiteral(234);
+        assert.strictEqual(recast.print(ast).code, code.replace("123", "234"));
+      },
+    );
+
+    pit(
+      "don't reprint on internal change next to leading comment",
+      function () {
+        const code = [
+          "function f() {",
+          "  return /* foo */   123     +     2 ;",
+          "}",
+        ].join(eol);
+        const ast = recast.parse(code, { parser });
+        ast.program.body[0].body.body[0].argument.left = b.numericLiteral(234);
+        assert.strictEqual(recast.print(ast).code, code.replace("123", "234"));
+      },
+    );
+
     pit("don't wrap on internal change, when JSX", function () {
       if (parserName === "acorn" || parserName === "typescript") {
         // SKIP on parsers that don't support this syntax.

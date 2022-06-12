@@ -5,7 +5,12 @@ const Printable = types.namedTypes.Printable;
 const Expression = types.namedTypes.Expression;
 const ReturnStatement = types.namedTypes.ReturnStatement;
 const SourceLocation = types.namedTypes.SourceLocation;
-import { comparePos, copyPos, getUnionOfKeys } from "./util";
+import {
+  comparePos,
+  copyPos,
+  findLeadingComment,
+  getUnionOfKeys,
+} from "./util";
 import FastPath from "./fast-path";
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
@@ -520,9 +525,12 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
 
     for (let i = originalReprintCount; i < reprints.length; i++) {
       const affectedLoc = reprints[i].oldPath.getValue().loc;
-      if (affectedLoc.start.token <= restrictedToken) {
-        // This reprint affects the restricted token.
-        // Just in case it inserts a leading comment, reprint.
+      if (
+        affectedLoc.start.token <= restrictedToken &&
+        findLeadingComment(reprints[i].newPath.getValue())
+      ) {
+        // This reprint affects the restricted token, and has a (possibly
+        // nested) leading comment.  Reprint.
         return false;
       }
     }
