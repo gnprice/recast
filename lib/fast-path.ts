@@ -35,6 +35,7 @@ interface FastPathType {
   getNode(count?: number): any;
   getParentNode(count?: number): any;
   getRootValue(): any;
+  formatPropertyPath(): string;
   call(callback: any, ...names: any[]): any;
   each(callback: any, ...names: any[]): any;
   map(callback: any, ...names: any[]): any;
@@ -147,6 +148,20 @@ FPp.getRootValue = function getRootValue() {
     return s[1];
   }
   return s[0];
+};
+
+FPp.formatPropertyPath = function formatPropertyPath() {
+  const s = this.stack;
+  const parts = [];
+  for (let i = 1; i < s.length; i += 2) {
+    const name = s[i];
+    if (/[_$a-z][_$a-z0-9]*/i.test(name)) {
+      parts.push("." + name);
+    } else {
+      parts.push("[" + JSON.stringify(name) + "]");
+    }
+  }
+  return parts.join("");
 };
 
 // Temporarily push properties named by string arguments given after the
