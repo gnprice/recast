@@ -818,8 +818,7 @@ function runTestsForParser(parserId: any) {
       function () {
         const code = [
           "function f() {",
-          "  return /*",
-          "    foo */   1     +     2 ;",
+          "  return /* foo */   1     +     2 ;",
           "}",
         ].join(eol);
         const ast = recast.parse(code, { parser });
