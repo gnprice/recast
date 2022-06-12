@@ -505,10 +505,12 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     reprints.length > originalReprintCount
   ) {
     if (!oldNode.argument) return false;
-    const tokens = oldNode.loc.tokens;
     const asiSensitiveToken = oldNode.loc.start.token;
+    const endToken = oldNode.loc.end.token;
+
+    const tokens = oldNode.loc.tokens;
     let i = asiSensitiveToken + 1;
-    while (i < tokens.length && types.namedTypes.Comment.check(tokens[i])) i++;
+    while (i < endToken && types.namedTypes.Comment.check(tokens[i])) i++;
     const restrictedToken = i;
 
     // console.log({
