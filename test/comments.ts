@@ -754,7 +754,7 @@ function runTestsForParser(parserId: any) {
     "should not wrap return argument in parens on change that doesn't cause ASI, with JSX",
     function () {
       if (parserName === "acorn" || parserName === "typescript") {
-        // Skip on parsers that don't support this syntax.
+        // SKIP on parsers that don't support this syntax.
         return;
       }
       // https://github.com/benjamn/recast/issues/552#issuecomment-894638273
@@ -795,7 +795,7 @@ function runTestsForParser(parserId: any) {
         // This test currently fails on these parsers (because the
         // BinaryExpression has `.extra.parenthesized`, and our needsParens
         // logic causes us to reprint it.)  Check that it's still failing.
-        assert.notStrictEqual(recast.print(ast).code, code); // wrong answer
+        assert.notStrictEqual(recast.print(ast).code, code); // FAIL
       } else {
         // On other parsers, the test passes.
         assert.strictEqual(recast.print(ast).code, code);
