@@ -5,12 +5,7 @@ const Printable = types.namedTypes.Printable;
 const Expression = types.namedTypes.Expression;
 const ReturnStatement = types.namedTypes.ReturnStatement;
 const SourceLocation = types.namedTypes.SourceLocation;
-import {
-  comparePos,
-  copyPos,
-  getUnionOfKeys,
-  findLeadingComment,
-} from "./util";
+import { comparePos, copyPos, getUnionOfKeys } from "./util";
 import FastPath from "./fast-path";
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
@@ -469,19 +464,6 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
   // let it be printed generically.
   if (newPath.needsParens() && !oldPath.hasParens()) {
     return false;
-  }
-
-  if (ReturnStatement.check(newNode)) {
-    const newLeading = findLeadingComment(newNode.argument);
-    if (newLeading) {
-      const oldLeading = findLeadingComment(oldNode.argument);
-      // console.log("old", oldLeading, "new", newLeading);
-      if (oldLeading !== newLeading) {
-        // A comment was inserted at the start of the argument.
-        // Reprint to avoid running into ASI issues (like #362.)
-        // return false;
-      }
-    }
   }
 
   const keys = getUnionOfKeys(oldNode, newNode);
