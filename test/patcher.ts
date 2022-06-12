@@ -107,10 +107,10 @@ describe("patcher", function () {
   });
 
   it("should patch return/throw/etc. arguments correctly", function () {
-    const strAST = parse('return"foo"');
+    const strAST = parse('return"foo";');
     const returnStmt = strAST.program.body[0];
     n.ReturnStatement.assert(returnStmt);
-    assert.strictEqual(recast.print(strAST).code, 'return"foo"');
+    assert.strictEqual(recast.print(strAST).code, 'return"foo";');
 
     returnStmt.argument = b.literal(null);
     assert.strictEqual(
