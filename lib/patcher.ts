@@ -161,7 +161,6 @@ Pp.deleteComments = function (node) {
 
 export function getReprinter(path: any) {
   assert.ok(path instanceof FastPath);
-  // console.log("getReprinter", path.formatPropertyPath(), path.getValue()?.type);
 
   // Make sure that this path refers specifically to a Node, rather than
   // some non-Node subproperty of a Node.
@@ -283,7 +282,6 @@ function needsTrailingSpace(oldLines: any, oldLoc: any, newLines: any) {
 }
 
 function findReprints(newPath: any, reprints: any) {
-  // console.log("findReprints", newPath.formatPropertyPath());
   const newNode = newPath.getValue();
   Printable.assert(newNode);
 
@@ -513,15 +511,8 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     while (i < endToken && types.namedTypes.Comment.check(tokens[i])) i++;
     const restrictedToken = i;
 
-    // console.log({
-    //   asiSensitivePos,
-    //   end: argLoc.end,
-    //   // tokens: argLoc.tokens.slice(argLoc.start.token, argLoc.end.token),
-    //   tokens: argLoc.tokens,
-    // });
     for (let i = originalReprintCount; i < reprints.length; i++) {
       const affectedLoc = reprints[i].oldPath.getValue().loc;
-      // console.log({ affectedLoc });
       if (affectedLoc.start.token <= restrictedToken) {
         return false;
       }
