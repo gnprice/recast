@@ -507,34 +507,53 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     ReturnStatement.check(newNode) &&
     reprints.length > originalReprintCount
   ) {
-    // Something changed.  See if it could cause ASI.
-
-    // This is the token before the "[no LineTerminator here]" annotation
-    // in the restricted production.  See spec:
-    //   https://tc39.es/ecma262/#sec-automatic-semicolon-insertion
-    const asiSensitiveToken = oldNode.loc.start.token;
-
-    const endToken = oldNode.loc.end.token;
-    const tokens = oldNode.loc.tokens;
-    let i = asiSensitiveToken + 1;
-    while (i < endToken && types.namedTypes.Comment.check(tokens[i])) i++;
-    // This is the "restricted token" as the spec calls it, the token just
-    // after the "[no LineTerminator here]" annotation.  If it gets
-    // separated from `asiSensitiveToken` by a newline, then ASI will occur.
-    const restrictedToken = i;
-
-    for (let i = originalReprintCount; i < reprints.length; i++) {
-      const affectedLoc = reprints[i].oldPath.getValue().loc;
-      if (
-        affectedLoc.start.token <= restrictedToken &&
-        findLeadingComment(reprints[i].newPath.getValue())
-      ) {
-        // This reprint affects the restricted token, and has a (possibly
-        // nested) leading comment.  Reprint.
-        return false;
-      }
+    const token = oldNode.loc.start.token; // The `return` keyword is ASI-sensitive.
+    if (findAsiAfterToken(oldNode, token, reprints, originalReprintCount)) {
+      // Some reprint would cause ASI.  Reprint.
+      return false;
     }
   }
 
   return true;
+}
+
+// Find whether any of the given reprints would cause ASI here.
+//
+// `oldNode` should be a node from a "restricted production" listed here:
+//   https://tc39.es/ecma262/#sec-rules-of-automatic-semicolon-insertion
+// and `asiSensitiveToken` should be (the token index of) the token in that
+// production that comes just before the "[no LineTerminator here]"
+// annotation.
+//
+// Further, the token `asiSensitiveToken` should be one that can't have
+// comments attached and will definitely appear the same way in the new
+// code: for example, the `return` keyword of a ReturnStatement.
+function findAsiAfterToken(
+  oldNode: any,
+  asiSensitiveToken: any,
+  reprints: any[],
+  reprintSliceStart: number,
+) {
+  const endToken = oldNode.loc.end.token;
+  const tokens = oldNode.loc.tokens;
+  let i = asiSensitiveToken + 1;
+  while (i < endToken && types.namedTypes.Comment.check(tokens[i])) i++;
+  // This is the "restricted token" as the spec calls it, the token just
+  // after the "[no LineTerminator here]" annotation.  If it gets
+  // separated from `asiSensitiveToken` by a newline, then ASI will occur.
+  const restrictedToken = i;
+
+  for (let i = reprintSliceStart; i < reprints.length; i++) {
+    const affectedLoc = reprints[i].oldPath.getValue().loc;
+    if (
+      affectedLoc.start.token <= restrictedToken &&
+      findLeadingComment(reprints[i].newPath.getValue())
+    ) {
+      // This reprint affects the restricted token, and has a (possibly
+      // nested) leading comment.  It will cause ASI.
+      return true;
+    }
+  }
+
+  return false;
 }
