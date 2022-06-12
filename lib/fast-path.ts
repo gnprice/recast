@@ -43,7 +43,6 @@ interface FastPathType {
   getPrevToken(node: any): any;
   getNextToken(node: any): any;
   needsParens(): any;
-  hasLeadingComment(): boolean;
   firstInExpressionStatement(): boolean;
   firstInExpressionStatementOrExpressionBody(
     onlyExpressionStatement?: boolean,
