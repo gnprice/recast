@@ -348,3 +348,22 @@ export function isTrailingCommaEnabled(options: any, context: any) {
   }
   return !!trailingComma;
 }
+
+export function hasLeadingComment(node: null | types.namedTypes.Node): boolean {
+  if (!node) return false;
+  while (true) {
+    if (node.comments?.some((comment) => comment.leading)) {
+      return true;
+    }
+    if (n.AssignmentExpression.check(node)) node = node.left;
+    else if (n.SequenceExpression.check(node)) node = node.expressions[0];
+    else if (n.CallExpression.check(node)) node = node.callee;
+    else if (n.MemberExpression.check(node)) node = node.object;
+    else if (n.ConditionalExpression.check(node)) node = node.test;
+    else if (n.BinaryExpression.check(node)) node = node.left;
+    else if (n.LogicalExpression.check(node)) node = node.left;
+    else if (n.UnaryExpression.check(node) && !node.prefix)
+      node = node.argument;
+    else return false;
+  }
+}

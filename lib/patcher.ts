@@ -5,7 +5,7 @@ const Printable = types.namedTypes.Printable;
 const Expression = types.namedTypes.Expression;
 const ReturnStatement = types.namedTypes.ReturnStatement;
 const SourceLocation = types.namedTypes.SourceLocation;
-import { comparePos, copyPos, getUnionOfKeys } from "./util";
+import { comparePos, copyPos, getUnionOfKeys, hasLeadingComment } from "./util";
 import FastPath from "./fast-path";
 const isObject = types.builtInTypes.object;
 const isArray = types.builtInTypes.array;
@@ -462,6 +462,12 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     return false;
   }
 
+  if (ReturnStatement.check(newNode) && hasLeadingComment(newNode.argument)) {
+    // A comment was inserted at the start of the argument.
+    // Reprint to avoid running into ASI issues (like #362.)
+    return false;
+  }
+
   const keys = getUnionOfKeys(oldNode, newNode);
 
   if (oldNode.type === "File" || newNode.type === "File") {
@@ -500,7 +506,7 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     ReturnStatement.check(newPath.getNode()) &&
     reprints.length > originalReprintCount
   ) {
-    return false;
+    // return false;
   }
 
   return true;
