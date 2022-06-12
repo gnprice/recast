@@ -778,7 +778,6 @@ function runTestsForParser(parserId: any) {
   pit(
     "(failing) should not reprint just because the return expression started with comment",
     function () {
-      return;
       const code = [
         "function f() {",
         "  return (",
@@ -788,7 +787,7 @@ function runTestsForParser(parserId: any) {
         "}",
       ].join(eol);
       const ast = recast.parse(code, { parser });
-      assert.notStrictEqual(recast.print(ast).code, code); // FAIL; should be equal
+      assert.strictEqual(recast.print(ast).code, code);
     },
   );
 
