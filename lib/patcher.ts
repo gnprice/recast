@@ -495,24 +495,34 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     }
   }
 
-  // Return statements might end up running into ASI issues due to
-  // comments inserted deep within the tree, so reprint them if anything
-  // changed within them.
+  // A return statement can accidentally suffer ASI if a comment gets
+  // inserted between it and the first non-comment token of its argument.
+  // Reprint when necessary to avoid that.
   if (
     ReturnStatement.check(newNode) &&
     reprints.length > originalReprintCount
   ) {
-    const asiSensitiveToken = oldNode.loc.start.token;
-    const endToken = oldNode.loc.end.token;
+    // Something changed.  See if it could cause ASI.
 
+    // This is the token before the "[no LineTerminator here]" annotation
+    // in the restricted production.  See spec:
+    //   https://tc39.es/ecma262/#sec-automatic-semicolon-insertion
+    const asiSensitiveToken = oldNode.loc.start.token;
+
+    const endToken = oldNode.loc.end.token;
     const tokens = oldNode.loc.tokens;
     let i = asiSensitiveToken + 1;
     while (i < endToken && types.namedTypes.Comment.check(tokens[i])) i++;
+    // This is the "restricted token" as the spec calls it, the token just
+    // after the "[no LineTerminator here]" annotation.  If it gets
+    // separated from `asiSensitiveToken` by a newline, then ASI will occur.
     const restrictedToken = i;
 
     for (let i = originalReprintCount; i < reprints.length; i++) {
       const affectedLoc = reprints[i].oldPath.getValue().loc;
       if (affectedLoc.start.token <= restrictedToken) {
+        // This reprint affects the restricted token.
+        // Just in case it inserts a leading comment, reprint.
         return false;
       }
     }
