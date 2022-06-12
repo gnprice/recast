@@ -869,6 +869,23 @@ function runTestsForParser(parserId: any) {
     });
   });
 
+  pit("(failing) avoid ASI on yield", function () {
+    const code = ["function *f() {", "  yield 3;", "}"].join(eol);
+    const ast = recast.parse(code, { parser });
+    ast.program.body[0].body.body[0].expression.argument.comments = [
+      b.line("Foo"),
+    ];
+    if (
+      recast.types.astNodesAreEquivalent(
+        recast.parse(recast.prettyPrint(ast).code, { parser }),
+        ast,
+      )
+    ) {
+      // This test is currently failing.
+      assert.fail("unexpected success");
+    }
+  });
+
   pit("should correctly handle a lonesome comment (alt 1)", function () {
     const code = ["", "// boo", ""].join(eol);
 

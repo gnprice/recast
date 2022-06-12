@@ -500,15 +500,26 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     }
   }
 
-  // A return statement can accidentally suffer ASI if a comment gets
-  // inserted between it and the first non-comment token of its argument.
-  // Reprint when necessary to avoid that.
-  if (
-    ReturnStatement.check(newNode) &&
-    reprints.length > originalReprintCount
-  ) {
-    const token = oldNode.loc.start.token; // The `return` keyword is ASI-sensitive.
-    if (findAsiAfterToken(oldNode, token, reprints, originalReprintCount)) {
+  // Some kinds of nodes can accidentally suffer ASI if a comment gets
+  // inserted at the wrong spot.  Reprint when necessary to avoid that.
+  if (reprints.length > originalReprintCount) {
+    let asiSensitiveToken;
+    if (ReturnStatement.check(newNode))
+      asiSensitiveToken = oldNode.loc.start.token; // The `return` keyword.
+
+    // TODO also after throw, yield, break, continue; after async; before
+    //   `=>`; before `--` and `++`.  (This also requires the reprinting to
+    //   actually help; ReturnStatement has special logic for it.)
+
+    if (
+      asiSensitiveToken != null &&
+      findAsiAfterToken(
+        oldNode,
+        asiSensitiveToken,
+        reprints,
+        originalReprintCount,
+      )
+    ) {
       // Some reprint would cause ASI.  Reprint.
       return false;
     }
