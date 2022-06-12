@@ -349,12 +349,11 @@ export function isTrailingCommaEnabled(options: any, context: any) {
   return !!trailingComma;
 }
 
-export function hasLeadingComment(node: null | types.namedTypes.Node): boolean {
-  if (!node) return false;
+export function findLeadingComment(node: null | types.namedTypes.Node) {
+  if (!node) return null;
   while (true) {
-    if (node.comments?.some((comment) => comment.leading)) {
-      return true;
-    }
+    const comment = node.comments?.find((comment) => comment.leading);
+    if (comment) return comment;
     if (n.AssignmentExpression.check(node)) node = node.left;
     else if (n.SequenceExpression.check(node)) node = node.expressions[0];
     else if (n.CallExpression.check(node)) node = node.callee;
@@ -364,6 +363,6 @@ export function hasLeadingComment(node: null | types.namedTypes.Node): boolean {
     else if (n.LogicalExpression.check(node)) node = node.left;
     else if (n.UnaryExpression.check(node) && !node.prefix)
       node = node.argument;
-    else return false;
+    else return null;
   }
 }
