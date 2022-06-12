@@ -736,6 +736,30 @@ function runTestsForParser(parserId: any) {
   );
 
   pit(
+    "should wrap in parens when return gains argument with leading comment",
+    function () {
+      const code = ["function f() {", "  return;", "}"].join(eol);
+
+      const ast = recast.parse(code, { parser });
+      ast.program.body[0].body.body[0].argument = b.nullLiteral.from({
+        comments: [b.line("Foo")],
+      });
+
+      assert.strictEqual(
+        recast.print(ast).code,
+        [
+          "function f() {",
+          "  return (",
+          "    //Foo",
+          "    null",
+          "  );",
+          "}",
+        ].join(eol),
+      );
+    },
+  );
+
+  pit(
     "should not wrap return argument in parens on change that doesn't cause ASI, with comments",
     function () {
       // https://github.com/benjamn/recast/issues/552

@@ -502,7 +502,6 @@ function findChildReprints(newPath: any, oldPath: any, reprints: any) {
     ReturnStatement.check(newNode) &&
     reprints.length > originalReprintCount
   ) {
-    if (!oldNode.argument) return false;
     const asiSensitiveToken = oldNode.loc.start.token;
     const endToken = oldNode.loc.end.token;
 
